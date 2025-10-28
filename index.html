@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Controle pessoal de ingestão de líquidos">
+    <meta name="theme-color" content="#1e3c72">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="icon.svg">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <title>Beba Água - Controle de Líquidos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #1e3c72;
+            font-size: 24px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .section {
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            color: #1e3c72;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .volume-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .volume-btn {
+            background: #1e3c72;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 20px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            touch-action: manipulation;
+        }
+
+        .volume-btn:active {
+            transform: scale(0.95);
+            background: #2a5298;
+        }
+
+        .volume-btn.selected {
+            background: #0f2350;
+            box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.3);
+        }
+
+        .custom-input {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #1e3c72;
+            border-radius: 12px;
+            font-size: 16px;
+            color: #1e3c72;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .custom-input:focus {
+            border-color: #2a5298;
+        }
+
+        .liquid-options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: #f5f7fa;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .radio-option:active {
+            background: #e8ecf1;
+        }
+
+        .radio-option input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            cursor: pointer;
+        }
+
+        .radio-option label {
+            flex: 1;
+            color: #1e3c72;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .other-input {
+            margin-top: 8px;
+            display: none;
+        }
+
+        .other-input.show {
+            display: block;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: #1e3c72;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 18px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            touch-action: manipulation;
+        }
+
+        .submit-btn:active {
+            transform: scale(0.98);
+            background: #2a5298;
+        }
+
+        .submit-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .message {
+            margin-top: 16px;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 14px;
+            display: none;
+        }
+
+        .message.success {
+            background: #d1fae5;
+            color: #065f46;
+            display: block;
+        }
+
+        .message.error {
+            background: #fee2e2;
+            color: #991b1b;
+            display: block;
+        }
+
+        .install-prompt {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: #1e3c72;
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            display: none;
+            align-items: center;
+            gap: 12px;
+            z-index: 1000;
+        }
+
+        .install-prompt.show {
+            display: flex;
+        }
+
+        .install-prompt button {
+            background: white;
+            color: #1e3c72;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .install-prompt .close-btn {
+            background: transparent;
+            color: white;
+            padding: 4px 8px;
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                padding: 32px;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+
+            .volume-buttons {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .install-prompt {
+                max-width: 500px;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💧 Beba Água</h1>
+
+        <div class="section">
+            <div class="section-title">Volume</div>
+            <div class="volume-buttons">
+                <button class="volume-btn" data-volume="250">250 ml</button>
+                <button class="volume-btn" data-volume="500">500 ml</button>
+                <button class="volume-btn" data-volume="750">750 ml</button>
+                <button class="volume-btn" data-volume="1000">1000 ml</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Volume Personalizado</div>
+            <input type="number" id="customVolume" class="custom-input" placeholder="Digite o volume em ml" min="1" step="1">
+        </div>
+
+        <div class="section">
+            <div class="section-title">Tipo de Líquido</div>
+            <div class="liquid-options">
+                <div class="radio-option">
+                    <input type="radio" id="agua" name="liquidType" value="Água" checked>
+                    <label for="agua">Água</label>
+                </div>
+                <div class="radio-option">
+                    <input type="radio" id="cafe" name="liquidType" value="Café">
+                    <label for="cafe">Café</label>
+                </div>
+                <div class="radio-option">
+                    <input type="radio" id="suco" name="liquidType" value="Suco">
+                    <label for="suco">Suco</label>
+                </div>
+                <div class="radio-option">
+                    <input type="radio" id="refrigerante" name="liquidType" value="Refrigerante">
+                    <label for="refrigerante">Refrigerante</label>
+                </div>
+                <div class="radio-option">
+                    <input type="radio" id="outro" name="liquidType" value="Outro">
+                    <label for="outro">Outro</label>
+                </div>
+                <input type="text" id="otherInput" class="custom-input other-input" placeholder="Digite o nome do líquido">
+            </div>
+        </div>
+
+        <button class="submit-btn" id="submitBtn">Adicionar Ingestão</button>
+        <div class="message" id="message"></div>
+    </div>
+
+    <div class="install-prompt" id="installPrompt">
+        <span>📱 Instale o app para acesso rápido!</span>
+        <button id="installBtn">Instalar</button>
+        <button class="close-btn" id="closeInstallBtn">✕</button>
+    </div>
+
+    <script>
+        // CONFIGURAÇÃO: Cole aqui a URL do seu Web App do Google Apps Script
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwVPzSGAZOf32Mjp2dDNJ9dXPrPkP1ACG2_tO14KtwyIA-l0P9tbtqANyKrAyoS9SWF/exec';
+
+        let selectedVolume = null;
+        const volumeButtons = document.querySelectorAll('.volume-btn');
+        const customVolumeInput = document.getElementById('customVolume');
+        const otherRadio = document.getElementById('outro');
+        const otherInput = document.getElementById('otherInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const messageDiv = document.getElementById('message');
+
+        // PWA Install Prompt
+        let deferredPrompt;
+        const installPrompt = document.getElementById('installPrompt');
+        const installBtn = document.getElementById('installBtn');
+        const closeInstallBtn = document.getElementById('closeInstallBtn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installPrompt.classList.add('show');
+        });
+
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                deferredPrompt = null;
+                installPrompt.classList.remove('show');
+            }
+        });
+
+        closeInstallBtn.addEventListener('click', () => {
+            installPrompt.classList.remove('show');
+        });
+
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('Service Worker registrado'))
+                    .catch(err => console.log('Erro ao registrar Service Worker:', err));
+            });
+        }
+
+        // Gerenciar seleção de volume pelos botões
+        volumeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                volumeButtons.forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                selectedVolume = parseInt(btn.dataset.volume);
+                customVolumeInput.value = '';
+            });
+        });
+
+        // Gerenciar volume personalizado
+        customVolumeInput.addEventListener('input', () => {
+            volumeButtons.forEach(b => b.classList.remove('selected'));
+            selectedVolume = customVolumeInput.value ? parseInt(customVolumeInput.value) : null;
+        });
+
+        // Mostrar/ocultar campo "Outro"
+        document.querySelectorAll('input[name="liquidType"]').forEach(radio => {
+            radio.addEventListener('change', () => {
+                if (otherRadio.checked) {
+                    otherInput.classList.add('show');
+                    otherInput.focus();
+                } else {
+                    otherInput.classList.remove('show');
+                    otherInput.value = '';
+                }
+            });
+        });
+
+        // Função para mostrar mensagem
+        function showMessage(text, type) {
+            messageDiv.textContent = text;
+            messageDiv.className = `message ${type}`;
+            setTimeout(() => {
+                messageDiv.className = 'message';
+            }, 3000);
+        }
+
+        // Função para formatar data e hora
+        function getFormattedDateTime() {
+            const now = new Date();
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const year = now.getFullYear();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            
+            return {
+                date: `${day}/${month}/${year}`,
+                time: `${hours}:${minutes}`
+            };
+        }
+
+        // Enviar dados
+        submitBtn.addEventListener('click', async () => {
+            // Validar volume
+            if (!selectedVolume || selectedVolume <= 0) {
+                showMessage('Por favor, selecione ou digite um volume válido', 'error');
+                return;
+            }
+
+            // Obter tipo de líquido
+            const selectedRadio = document.querySelector('input[name="liquidType"]:checked');
+            let liquidType = selectedRadio.value;
+            
+            if (liquidType === 'Outro') {
+                liquidType = otherInput.value.trim();
+                if (!liquidType) {
+                    showMessage('Por favor, digite o nome do líquido', 'error');
+                    otherInput.focus();
+                    return;
+                }
+            }
+
+            // Verificar se a URL foi configurada
+            if (SCRIPT_URL === 'COLE_AQUI_A_URL_DO_SEU_WEBAPP') {
+                showMessage('Configure a URL do Google Apps Script no código', 'error');
+                return;
+            }
+
+            // Preparar dados
+            const { date, time } = getFormattedDateTime();
+            const data = {
+                data: date,
+                hora: time,
+                tipo: liquidType,
+                volume: selectedVolume
+            };
+
+            // Enviar
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Enviando...';
+
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                showMessage('✓ Ingestão registrada com sucesso!', 'success');
+                
+                // Resetar formulário
+                volumeButtons.forEach(b => b.classList.remove('selected'));
+                customVolumeInput.value = '';
+                selectedVolume = null;
+                document.getElementById('agua').checked = true;
+                otherInput.classList.remove('show');
+                otherInput.value = '';
+
+            } catch (error) {
+                showMessage('Erro ao enviar dados. Tente novamente.', 'error');
+                console.error('Erro:', error);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Adicionar Ingestão';
+            }
+        });
+    </script>
+</body>
+</html>

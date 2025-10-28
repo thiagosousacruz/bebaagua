@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Fundo -->
+  <rect width="512" height="512" rx="115" fill="#1e3c72"/>
+  
+  <!-- Gota de água -->
+  <path d="M256 96c-48 72-96 128-96 176 0 53.02 42.98 96 96 96s96-42.98 96-96c0-48-48-104-96-176z" 
+        fill="#ffffff" opacity="0.95"/>
+  
+  <!-- Brilho na gota -->
+  <ellipse cx="230" cy="240" rx="25" ry="35" fill="#ffffff" opacity="0.4"/>
+  
+  <!-- Ondas embaixo -->
+  <path d="M140 400c20-10 40-10 60 0s40 10 60 0 40-10 60 0 40 10 60 0" 
+        stroke="#ffffff" stroke-width="12" stroke-linecap="round" 
+        fill="none" opacity="0.6"/>
+  <path d="M140 430c20-10 40-10 60 0s40 10 60 0 40-10 60 0 40 10 60 0" 
+        stroke="#ffffff" stroke-width="12" stroke-linecap="round" 
+        fill="none" opacity="0.4"/>
+</svg>
