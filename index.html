@@ -221,6 +221,27 @@
             padding: 4px 8px;
         }
 
+        /* Estilos para exibição do total */
+        .total-display {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 4px 12px rgba(30, 60, 114, 0.3);
+        }
+
+        .total-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .total-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
         @media (min-width: 768px) {
             .container {
                 padding: 32px;
@@ -239,12 +260,25 @@
                 left: 50%;
                 transform: translateX(-50%);
             }
+
+            .total-value {
+                font-size: 36px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>💧 Beba Água</h1>
+
+        <!-- Seção para exibir total do dia -->
+        <div class="section">
+            <div class="section-title">Total Consumido Hoje</div>
+            <div class="total-display" id="totalDisplay">
+                <div class="total-value">Carregando...</div>
+                <div class="total-label">ml de líquidos</div>
+            </div>
+        </div>
 
         <div class="section">
             <div class="section-title">Volume</div>
@@ -397,6 +431,40 @@
             };
         }
 
+        // Função para buscar e atualizar o total de líquidos consumidos no dia
+        async function updateTotalDisplay() {
+            const totalDisplay = document.getElementById('totalDisplay');
+            const totalValue = totalDisplay.querySelector('.total-value');
+            const totalLabel = totalDisplay.querySelector('.total-label');
+            
+            try {
+                // Fazer requisição GET para obter o total do dia
+                const response = await fetch(SCRIPT_URL);
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    // Usar os novos campos de exibição (ml ou L)
+                    const valorExibicao = data.valorExibicao || 0;
+                    const formato = data.formato || 'ml';
+                    
+                    totalValue.textContent = valorExibicao;
+                    totalLabel.textContent = formato + ' de líquidos';
+                } else {
+                    totalValue.textContent = '0';
+                    totalLabel.textContent = 'ml de líquidos';
+                }
+            } catch (error) {
+                console.error('Erro ao buscar total:', error);
+                totalValue.textContent = '0';
+                totalLabel.textContent = 'ml de líquidos';
+            }
+        }
+
+        // Atualizar total quando a página carrega
+        document.addEventListener('DOMContentLoaded', () => {
+            updateTotalDisplay();
+        });
+
         // Enviar dados
         submitBtn.addEventListener('click', async () => {
             // Validar volume
@@ -456,6 +524,9 @@
                 document.getElementById('agua').checked = true;
                 otherInput.classList.remove('show');
                 otherInput.value = '';
+
+                // Atualizar o total após registrar nova ingestão
+                setTimeout(updateTotalDisplay, 1000);
 
             } catch (error) {
                 showMessage('Erro ao enviar dados. Tente novamente.', 'error');
