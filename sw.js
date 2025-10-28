@@ -1,4 +1,4 @@
-const CACHE_NAME = 'beba-agua-v1';
+const CACHE_NAME = 'beba-agua-v1.1';
 const urlsToCache = [
   '/bebaagua/',
   '/bebaagua/index.html',
@@ -62,4 +62,5 @@ self.addEventListener('fetch', (event) => {
         return caches.match(event.request);
       })
   );
+
 });
